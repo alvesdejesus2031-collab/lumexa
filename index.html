@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-PT" style=""><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumexa — Loja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EFE7D8; --ink:#221D17; --paper:#FBF7EE; --line:rgba(34,29,23,.14);
+    --gold:#A9772E; --gold-ink:#5E4319; --teal:#20493F; --teal-bg:#DCE6DF;
+    --amber-bg:#F3E3C4; --amber-ink:#7A5416; --danger:#A5432B; --danger-bg:#F3DAD1;
+    --shadow:0 10px 30px rgba(34,29,23,.10);
+    box-sizing:border-box;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#171310; --ink:#F1EAE0; --paper:#221C16; --line:rgba(241,234,224,.14);
+      --teal-bg:#1B332C; --amber-bg:#3A2D14; --amber-ink:#E4C078; --danger-bg:#3A211B;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#171310; --ink:#F1EAE0; --paper:#221C16; --line:rgba(241,234,224,.14);
+    --teal-bg:#1B332C; --amber-bg:#3A2D14; --amber-ink:#E4C078; --danger-bg:#3A211B;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:Inter,system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  h1,h2,h3,.serif{font-family:Fraunces,Georgia,serif}
+  button{font-family:inherit; cursor:pointer}
+  input,select{font-family:inherit; font-size:16px}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px}
+
+  header.top{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--bg); border-bottom:1px solid var(--line)}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 16px}
+  .brand{font-size:22px; font-weight:600; letter-spacing:.2px}
+  .brand small{display:block; font-family:Inter; font-size:11px; font-weight:500; color:var(--gold-ink); letter-spacing:.4px}
+  .cart-btn{position:relative; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:10px 14px; font-size:15px; font-weight:600; color:var(--ink)}
+  .cart-badge{position:absolute; top:-6px; right:-6px; background:var(--danger); color:#fff; font-size:11px; font-weight:700; border-radius:999px; min-width:18px; height:18px; display:flex; align-items:center; justify-content:center; padding:0 4px}
+
+  .chips{display:flex; gap:8px; padding:0 16px 12px; overflow-x:auto}
+  .chip{flex:none; border:1px solid var(--line); background:transparent; color:var(--ink); padding:7px 14px; border-radius:999px; font-size:14px; font-weight:500}
+  .chip.active{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:14px 16px 100px}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:18px; overflow:hidden; text-align:left; padding:0; box-shadow:var(--shadow)}
+  .card .swatch{height:120px; display:flex; align-items:center; justify-content:center; font-size:34px}
+  .card .info{padding:12px 12px 14px}
+  .card .name{font-family:Fraunces; font-size:16px; font-weight:500; line-height:1.25; margin:0 0 4px}
+  .card .price{font-weight:600; font-size:15px}
+  .status-pill{display:inline-block; margin-top:8px; font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:999px}
+  .status-disponivel{background:var(--teal-bg); color:var(--teal)}
+  .status-espera{background:var(--amber-bg); color:var(--amber-ink)}
+  .status-a_chegar{background:var(--danger-bg); color:var(--danger)}
+  .status-indisponivel{background:rgba(34,29,23,.12); color:var(--ink); opacity:.8}
+  .card.unavailable{opacity:.55}
+
+  .sheet-overlay{position:fixed; inset:0; background:rgba(20,17,13,.45); z-index:40; display:none}
+  .sheet-overlay.open{display:block}
+  .sheet{position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--bg); border-radius:22px 22px 0 0; max-height:88vh; overflow-y:scroll; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; touch-action:pan-y; transform:translateY(100%); transition:transform .28s ease; padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+  .sheet.open{transform:translateY(0)}
+  .sheet-head{display:flex; justify-content:space-between; align-items:flex-start; padding:18px 18px 4px}
+  .sheet-close{background:none; border:none; font-size:22px; color:var(--ink); line-height:1; padding:4px}
+  .sheet-body{padding:6px 18px 18px}
+  .swatch-lg{height:150px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:56px; margin:0 18px}
+
+  .opt-label{font-size:13px; font-weight:600; color:var(--gold-ink); margin:16px 0 8px}
+  .opt-row{display:flex; gap:8px; flex-wrap:wrap}
+  .opt-pill{border:1.5px solid var(--line); background:var(--paper); padding:8px 14px; border-radius:12px; font-size:14px; font-weight:500; color:var(--ink)}
+  .opt-pill.sel{border-color:var(--ink); background:var(--ink); color:var(--bg)}
+  .qty-row{display:flex; align-items:center; gap:14px}
+  .qty-btn{width:38px; height:38px; border-radius:12px; border:1.5px solid var(--line); background:var(--paper); font-size:18px; font-weight:600}
+  .qty-val{font-size:17px; font-weight:600; min-width:22px; text-align:center}
+  .note-box{background:var(--amber-bg); color:var(--amber-ink); border-radius:14px; padding:12px 14px; font-size:13.5px; line-height:1.45; margin-top:16px}
+  .field{margin-top:14px}
+  .field label{display:block; font-size:13px; font-weight:600; margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%; padding:11px 12px; border-radius:12px; border:1.5px solid var(--line); background:var(--paper); color:var(--ink)}
+  .total-row{display:flex; justify-content:space-between; align-items:baseline; margin-top:18px; font-size:17px}
+  .total-row b{font-family:Fraunces; font-size:22px}
+  .primary-btn{width:100%; margin-top:16px; padding:15px; border:none; border-radius:14px; background:var(--ink); color:var(--bg); font-size:16px; font-weight:600}
+  .ghost-btn{width:100%; margin-top:10px; padding:13px; border:1.5px solid var(--line); border-radius:14px; background:transparent; color:var(--ink); font-size:14.5px; font-weight:500}
+
+  .cart-line{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); gap:10px}
+  .cart-line .meta{font-size:13px; color:var(--gold-ink); margin-top:2px}
+  .cart-line .rm{background:none; border:none; color:var(--danger); font-size:13px; font-weight:600}
+  .empty{text-align:center; padding:40px 20px; color:var(--gold-ink); font-size:14.5px}
+
+  .gear{position:fixed; left:14px; bottom:calc(14px + env(safe-area-inset-bottom,0px)); z-index:30; width:46px; height:46px; border-radius:50%; border:1px solid var(--line); background:var(--paper); box-shadow:var(--shadow); font-size:18px; display:none; align-items:center; justify-content:center}
+  .gear.show{display:flex}
+  .tabs{display:flex; gap:6px; padding:0 18px 10px}
+  .tab{flex:1; padding:9px; text-align:center; border-radius:11px; border:1px solid var(--line); font-size:13.5px; font-weight:600; background:transparent; color:var(--ink)}
+  .tab.active{background:var(--ink); color:var(--bg)}
+  .admin-product{border:1px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px; background:var(--paper)}
+  .admin-product .row2{display:flex; gap:8px}
+  .admin-product .row2 .field{flex:1}
+  .photo-row{display:flex; align-items:center; gap:12px; margin-top:14px}
+  .photo-preview{width:56px; height:56px; border-radius:12px; object-fit:cover; border:1px solid var(--line); background:var(--bg); flex:none; display:flex; align-items:center; justify-content:center; font-size:24px}
+  .photo-preview img{width:100%; height:100%; object-fit:cover; border-radius:11px}
+  .del-link{background:none;border:none;color:var(--danger);font-size:12.5px;font-weight:600;margin-top:8px}
+  .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:var(--bg); padding:12px 18px; border-radius:12px; font-size:14px; z-index:60; opacity:0; transition:opacity .25s}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body style="">
+
+<header class="top">
+  <div class="topbar wrap">
+    <div class="brand" id="storeName">Lumexa<small>roupa &amp; acessórios</small></div>
+    <button class="cart-btn" id="openCart">Carrinho<span class="cart-badge" id="cartBadge" style="display: flex;">1</span></button>
+  </div>
+  <div class="chips wrap" id="chips"><button class="chip active" data-cat="todos">Tudo</button><button class="chip " data-cat="roupa">Roupa</button><button class="chip " data-cat="acessorios">Acessórios</button></div>
+</header>
+
+<main class="wrap">
+  <div class="grid" id="grid">
+      <button class="card" data-id="p1">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">👕</div>
+        <div class="info">
+          <p class="name">Camisola Oversized</p>
+          <div class="price">Kz 9500</div>
+          <span class="status-pill status-disponivel">Disponível</span>
+        </div>
+      </button>
+      <button class="card" data-id="p2">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">👖</div>
+        <div class="info">
+          <p class="name">Calças Cargo</p>
+          <div class="price">Kz 12&nbsp;000</div>
+          <span class="status-pill status-disponivel">Disponível</span>
+        </div>
+      </button>
+      <button class="card" data-id="p3">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">👗</div>
+        <div class="info">
+          <p class="name">Vestido Midi</p>
+          <div class="price">Kz 11&nbsp;000</div>
+          <span class="status-pill status-espera">Tempo de espera</span>
+        </div>
+      </button>
+      <button class="card" data-id="p4">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">🧥</div>
+        <div class="info">
+          <p class="name">Corta-vento Técnico</p>
+          <div class="price">Kz 14&nbsp;500</div>
+          <span class="status-pill status-a_chegar">Chega em breve · reserva</span>
+        </div>
+      </button>
+      <button class="card" data-id="p5">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">🧢</div>
+        <div class="info">
+          <p class="name">Boné Trucker</p>
+          <div class="price">Kz 4500</div>
+          <span class="status-pill status-disponivel">Disponível</span>
+        </div>
+      </button>
+      <button class="card" data-id="p6">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">👜</div>
+        <div class="info">
+          <p class="name">Mala Tiracolo</p>
+          <div class="price">Kz 8500</div>
+          <span class="status-pill status-a_chegar">Chega em breve · reserva</span>
+        </div>
+      </button></div>
+</main>
+
+<button class="gear show" id="openAdmin" title="Administração">⚙️</button>
+
+<!-- PRODUCT SHEET -->
+<div class="sheet-overlay" id="prodOverlay"></div>
+<div class="sheet" id="prodSheet">
+  <div class="sheet-head"><h2 class="serif" id="prodTitle" style="margin:0;font-size:20px">Camisola Oversized</h2><button class="sheet-close" data-close="prod">✕</button></div>
+  <div class="swatch-lg" id="prodSwatch">👕</div>
+  <div class="sheet-body">
+    <div id="prodStatusNote"></div>
+    <div class="opt-label">Cor</div>
+    <div class="opt-row" id="prodColors"><button class="opt-pill sel" data-c="Preto">Preto</button><button class="opt-pill" data-c="Bege">Bege</button><button class="opt-pill" data-c="Verde-azeitona">Verde-azeitona</button></div>
+    <div class="opt-label">Tamanho</div>
+    <div class="opt-row" id="prodSizes"><button class="opt-pill" data-s="S">S</button><button class="opt-pill" data-s="M">M</button><button class="opt-pill sel" data-s="L">L</button><button class="opt-pill" data-s="XL">XL</button></div>
+    <div class="opt-label">Quantidade</div>
+    <div class="qty-row"><button class="qty-btn" id="qtyMinus">−</button><div class="qty-val" id="qtyVal">1</div><button class="qty-btn" id="qtyPlus">+</button></div>
+    <div id="depositField"></div>
+    <div class="total-row"><span>Total</span><b id="prodTotal">Kz 9500</b></div>
+    <button class="primary-btn" id="addToCartBtn">Adicionar ao carrinho</button>
+  </div>
+</div>
+
+<!-- CART SHEET -->
+<div class="sheet-overlay" id="cartOverlay"></div>
+<div class="sheet" id="cartSheet">
+  <div class="sheet-head"><h2 class="serif" style="margin:0;font-size:20px">O teu pedido</h2><button class="sheet-close" data-close="cart">✕</button></div>
+  <div class="sheet-body">
+    <div id="cartLines"><div class="empty">O carrinho está vazio.</div></div>
+    <div class="total-row"><span>Total</span><b id="cartTotal">Kz 0</b></div>
+    <div class="field"><label>O teu nome</label><input id="custName" placeholder="Como te chamas?"></div>
+    <div class="field"><label>Contacto / localidade</label><input id="custContact" placeholder="WhatsApp e bairro/cidade"></div>
+    <button class="primary-btn" id="sendOrderBtn">Enviar pedido por WhatsApp</button>
+    <div class="note-box" style="margin-top:12px">O pedido abre o WhatsApp já preenchido para confirmares diretamente com a loja. Itens em espera ou por chegar ficam marcados no pedido.</div>
+  </div>
+</div>
+
+<!-- ADMIN SHEET -->
+<div class="sheet-overlay" id="adminOverlay"></div>
+<div class="sheet" id="adminSheet" style="max-height:92vh">
+  <div class="sheet-head"><h2 class="serif" style="margin:0;font-size:20px">Administração</h2><button class="sheet-close" data-close="admin">✕</button></div>
+  <div class="tabs">
+    <button class="tab" data-tab="produtos">Produtos</button>
+    <button class="tab" data-tab="def">Definições</button>
+    <button class="tab active" data-tab="pedidos">Pedidos</button>
+  </div>
+  <div class="sheet-body">
+    <div id="tab-produtos" style="display: none;">
+      <div class="admin-product" data-i="0">
+        <div class="field"><label>Nome</label><input data-f="name" value="Camisola Oversized"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa" selected="">Roupa</option><option value="acessorios">Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="9500"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="Preto, Bege, Verde-azeitona"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="S, M, L, XL"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel" selected="">Disponível</option>
+              <option value="espera">Tempo de espera</option>
+              <option value="a_chegar">A chegar (reserva)</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="0"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value=""></div>
+        <button class="del-link" data-del="0">Remover produto</button>
+      </div>
+      <div class="admin-product" data-i="1">
+        <div class="field"><label>Nome</label><input data-f="name" value="Calças Cargo"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa" selected="">Roupa</option><option value="acessorios">Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="12000"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="Preto, Caqui"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="S, M, L, XL"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel" selected="">Disponível</option>
+              <option value="espera">Tempo de espera</option>
+              <option value="a_chegar">A chegar (reserva)</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="0"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value=""></div>
+        <button class="del-link" data-del="1">Remover produto</button>
+      </div>
+      <div class="admin-product" data-i="2">
+        <div class="field"><label>Nome</label><input data-f="name" value="Vestido Midi"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa" selected="">Roupa</option><option value="acessorios">Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="11000"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="Vinho, Preto"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="S, M, L"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel">Disponível</option>
+              <option value="espera" selected="">Tempo de espera</option>
+              <option value="a_chegar">A chegar (reserva)</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="0"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value="7 a 10 dias"></div>
+        <button class="del-link" data-del="2">Remover produto</button>
+      </div>
+      <div class="admin-product" data-i="3">
+        <div class="field"><label>Nome</label><input data-f="name" value="Corta-vento Técnico"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa" selected="">Roupa</option><option value="acessorios">Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="14500"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="Preto, Azul-marinho"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="M, L, XL"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel">Disponível</option>
+              <option value="espera">Tempo de espera</option>
+              <option value="a_chegar" selected="">A chegar (reserva)</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="3000"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value="chega por volta de 15 de outubro"></div>
+        <button class="del-link" data-del="3">Remover produto</button>
+      </div>
+      <div class="admin-product" data-i="4">
+        <div class="field"><label>Nome</label><input data-f="name" value="Boné Trucker"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa">Roupa</option><option value="acessorios" selected="">Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="4500"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="Preto, Branco"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="Único"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel" selected="">Disponível</option>
+              <option value="espera">Tempo de espera</option>
+              <option value="a_chegar">A chegar (reserva)</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="0"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value=""></div>
+        <button class="del-link" data-del="4">Remover produto</button>
+      </div>
+      <div class="admin-product" data-i="5">
+        <div class="field"><label>Nome</label><input data-f="name" value="Mala Tiracolo"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa">Roupa</option><option value="acessorios" selected="">Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="8500"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="Caramelo, Preto"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="Único"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel">Disponível</option>
+              <option value="espera">Tempo de espera</option>
+              <option value="a_chegar" selected="">A chegar (reserva)</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="2500"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value="chega por volta de 10 de outubro"></div>
+        <button class="del-link" data-del="5">Remover produto</button>
+      </div><button class="ghost-btn" id="addProdBtn">+ Adicionar produto</button></div>
+    <div id="tab-def" style="display: none;">
+      <div class="field"><label>Nome da loja</label><input id="defName" value="Lumexa"></div>
+      <div class="field"><label>Frase curta</label><input id="defTag" value="roupa &amp; acessórios"></div>
+      <div class="field"><label>Número de WhatsApp (com código do país, só números)</label><input id="defWa" value="244937770994" placeholder="244923456789"></div>
+      <div class="note-box">Os pedidos chegam a este número via WhatsApp já preenchidos. Sem este número, o botão de encomenda não sabe para onde enviar.</div></div>
+    <div id="tab-pedidos" style="display: block;"><div class="admin-product"><b>Alves</b> · 937770994<div class="meta" style="margin-top:6px">Camisola Oversized (Preto, S) x1</div><div style="margin-top:6px;font-weight:600">Kz 9500</div></div></div>
+    <button class="ghost-btn" id="publishBtn" style="margin-top:18px">Guardar e publicar alterações</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Adicionado ao carrinho</div>
+
+<script id="state-data" type="application/json">{"store":{"name":"Lumexa","tagline":"roupa & acessórios","whatsapp":"244937770994"},"products":[{"id":"p1","name":"Camisola Oversized","category":"roupa","emoji":"👕","price":9500,"colors":["Preto","Bege","Verde-azeitona"],"sizes":["S","M","L","XL"],"status":"disponivel","eta":"","deposit":0},{"id":"p2","name":"Calças Cargo","category":"roupa","emoji":"👖","price":12000,"colors":["Preto","Caqui"],"sizes":["S","M","L","XL"],"status":"disponivel","eta":"","deposit":0},{"id":"p3","name":"Vestido Midi","category":"roupa","emoji":"👗","price":11000,"colors":["Vinho","Preto"],"sizes":["S","M","L"],"status":"espera","eta":"7 a 10 dias","deposit":0},{"id":"p4","name":"Corta-vento Técnico","category":"roupa","emoji":"🧥","price":14500,"colors":["Preto","Azul-marinho"],"sizes":["M","L","XL"],"status":"a_chegar","eta":"chega por volta de 15 de outubro","deposit":3000},{"id":"p5","name":"Boné Trucker","category":"acessorios","emoji":"🧢","price":4500,"colors":["Preto","Branco"],"sizes":["Único"],"status":"disponivel","eta":"","deposit":0},{"id":"p6","name":"Mala Tiracolo","category":"acessorios","emoji":"👜","price":8500,"colors":["Caramelo","Preto"],"sizes":["Único"],"status":"a_chegar","eta":"chega por volta de 10 de outubro","deposit":2500}]}</script>
+
+<script>
+(function(){
+  "use strict";
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const kz = n => 'Kz ' + Math.round(n).toLocaleString('pt-PT');
+  const STATUS_LABEL = {disponivel:'Disponível', espera:'Tempo de espera', a_chegar:'Chega em breve · reserva', indisponivel:'Indisponível'};
+
+  let state = JSON.parse(document.getElementById('state-data').textContent);
+  let cart = [];
+  let activeCategory = 'todos';
+  let current = null; // product being viewed
+  let canEdit = false;
+  let dbApi = null;
+
+  function toast(msg){
+    const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2600);
+  }
+  let openCount = 0, lockedScrollY = 0;
+  function lockBody(){
+    if(openCount===0){ lockedScrollY = window.scrollY||0; document.body.style.position='fixed'; document.body.style.top='-'+lockedScrollY+'px'; document.body.style.left='0'; document.body.style.right='0'; }
+    openCount++;
+  }
+  function unlockBody(){
+    openCount = Math.max(0, openCount-1);
+    if(openCount===0){ document.body.style.position=''; document.body.style.top=''; document.body.style.left=''; document.body.style.right=''; window.scrollTo(0, lockedScrollY); }
+  }
+  function openSheet(id){ document.getElementById(id+'Overlay').classList.add('open'); document.getElementById(id+'Sheet').classList.add('open'); lockBody(); }
+  function closeSheet(id){ document.getElementById(id+'Overlay').classList.remove('open'); document.getElementById(id+'Sheet').classList.remove('open'); unlockBody(); }
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click', ()=>closeSheet(b.dataset.close)));
+  ['prod','cart','admin'].forEach(id=>document.getElementById(id+'Overlay').addEventListener('click', ()=>closeSheet(id)));
+
+  function renderHeader(){
+    document.getElementById('storeName').innerHTML = esc(state.store.name)+'<small>'+esc(state.store.tagline)+'</small>';
+    const cats = ['todos', ...new Set(state.products.map(p=>p.category))];
+    const labels = {todos:'Tudo', roupa:'Roupa', acessorios:'Acessórios'};
+    document.getElementById('chips').innerHTML = cats.map(c=>
+      `<button class="chip ${c===activeCategory?'active':''}" data-cat="${esc(c)}">${esc(labels[c]||c)}</button>`).join('');
+    document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click', ()=>{ activeCategory=ch.dataset.cat; renderHeader(); renderGrid(); }));
+  }
+
+  function renderGrid(){
+    const list = state.products.filter(p=>activeCategory==='todos'||p.category===activeCategory);
+    document.getElementById('grid').innerHTML = list.map(p=>`
+      <button class="card ${p.status==='indisponivel'?'unavailable':''}" data-id="${esc(p.id)}">
+        <div class="swatch" style="background:linear-gradient(160deg,var(--teal-bg),var(--amber-bg))">${p.image?`<img src="${p.image}" alt="" style="width:100%;height:100%;object-fit:cover">`:esc(p.emoji||'🛍️')}</div>
+        <div class="info">
+          <p class="name">${esc(p.name)}</p>
+          <div class="price">${kz(p.price)}</div>
+          <span class="status-pill status-${p.status}">${STATUS_LABEL[p.status]}</span>
+        </div>
+      </button>`).join('') || '<div class="empty">Sem produtos nesta categoria por agora.</div>';
+    document.querySelectorAll('.card').forEach(c=>c.addEventListener('click', ()=>openProduct(c.dataset.id)));
+  }
+
+  let sel = {color:null, size:null, qty:1, deposit:0};
+  function openProduct(id){
+    current = state.products.find(p=>p.id===id);
+    sel = {color:current.colors[0], size:current.sizes[0], qty:1, deposit:current.deposit||0};
+    document.getElementById('prodTitle').textContent = current.name;
+    document.getElementById('prodSwatch').innerHTML = current.image ? `<img src="${current.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:16px">` : esc(current.emoji||'🛍️');
+    const unavailable = current.status==='indisponivel';
+    document.getElementById('prodColors').innerHTML = unavailable ? '' : current.colors.map(c=>`<button class="opt-pill" data-c="${esc(c)}">${esc(c)}</button>`).join('');
+    document.getElementById('prodSizes').innerHTML = unavailable ? '' : current.sizes.map(s=>`<button class="opt-pill" data-s="${esc(s)}">${esc(s)}</button>`).join('');
+    document.querySelectorAll('.opt-label, .qty-row').forEach(el=>el.style.display = unavailable ? 'none' : '');
+    let note = '';
+    if(current.status==='espera') note = `<div class="note-box">Este artigo tem tempo de espera estimado: <b>${esc(current.eta||'a combinar')}</b>. Podes encomendar na mesma — a loja confirma o prazo contigo.</div>`;
+    if(current.status==='a_chegar') note = `<div class="note-box">Este artigo ainda não chegou — <b>${esc(current.eta||'brevemente')}</b>. Podes fazer já a tua marcação com um sinal para garantires a peça.</div>`;
+    if(unavailable) note = `<div class="note-box">Este artigo está de momento indisponível. Volta a verificar em breve ou contacta a loja para saberes mais.</div>`;
+    document.getElementById('prodStatusNote').innerHTML = note;
+    document.getElementById('depositField').innerHTML = current.status==='a_chegar'
+      ? `<div class="field"><label>Valor do sinal para reservar</label><input type="number" min="0" id="depositInput" value="${current.deposit||0}"></div>` : '';
+    if(current.status==='a_chegar'){
+      document.getElementById('depositInput').addEventListener('input', e=>{ sel.deposit = Number(e.target.value)||0; updateTotal(); });
+    }
+    const btn = document.getElementById('addToCartBtn');
+    btn.textContent = unavailable ? 'Indisponível' : (current.status==='a_chegar' ? 'Reservar com sinal' : 'Adicionar ao carrinho');
+    btn.disabled = unavailable;
+    btn.style.opacity = unavailable ? .5 : 1;
+    document.getElementById('prodTotal').closest('.total-row').style.display = unavailable ? 'none' : '';
+    refreshOptionUI();
+    updateTotal();
+    openSheet('prod');
+  }
+  function refreshOptionUI(){
+    document.querySelectorAll('#prodColors .opt-pill').forEach(b=>b.classList.toggle('sel', b.dataset.c===sel.color));
+    document.querySelectorAll('#prodSizes .opt-pill').forEach(b=>b.classList.toggle('sel', b.dataset.s===sel.size));
+    document.getElementById('qtyVal').textContent = sel.qty;
+  }
+  document.getElementById('prodColors').addEventListener('click', e=>{ if(e.target.dataset.c){ sel.color=e.target.dataset.c; refreshOptionUI(); }});
+  document.getElementById('prodSizes').addEventListener('click', e=>{ if(e.target.dataset.s){ sel.size=e.target.dataset.s; refreshOptionUI(); }});
+  document.getElementById('qtyMinus').addEventListener('click', ()=>{ sel.qty=Math.max(1,sel.qty-1); refreshOptionUI(); updateTotal(); });
+  document.getElementById('qtyPlus').addEventListener('click', ()=>{ sel.qty=Math.min(20,sel.qty+1); refreshOptionUI(); updateTotal(); });
+  function updateTotal(){
+    const total = current.status==='a_chegar' ? sel.deposit*sel.qty : current.price*sel.qty;
+    document.getElementById('prodTotal').textContent = kz(total) + (current.status==='a_chegar' ? ' (sinal)' : '');
+  }
+  document.getElementById('addToCartBtn').addEventListener('click', ()=>{
+    cart.push({productId:current.id, name:current.name, color:sel.color, size:sel.size, qty:sel.qty,
+      status:current.status, unitPrice: current.status==='a_chegar' ? sel.deposit : current.price,
+      isDeposit: current.status==='a_chegar'});
+    closeSheet('prod'); renderCartBadge(); toast('Adicionado ao carrinho');
+  });
+
+  function renderCartBadge(){
+    const b = document.getElementById('cartBadge');
+    if(cart.length){ b.style.display='flex'; b.textContent = cart.length; } else b.style.display='none';
+  }
+  function cartTotal(){ return cart.reduce((s,l)=>s+l.unitPrice*l.qty,0); }
+  function renderCart(){
+    document.getElementById('cartLines').innerHTML = cart.map((l,i)=>`
+      <div class="cart-line">
+        <div><div>${esc(l.name)} × ${l.qty}</div>
+        <div class="meta">${esc(l.color)} · ${esc(l.size)}${l.isDeposit?' · sinal de reserva':''}${l.status==='espera'?' · com tempo de espera':''}</div></div>
+        <div style="text-align:right"><div>${kz(l.unitPrice*l.qty)}</div><button class="rm" data-i="${i}">remover</button></div>
+      </div>`).join('') || '<div class="empty">O carrinho está vazio.</div>';
+    document.getElementById('cartTotal').textContent = kz(cartTotal());
+    document.querySelectorAll('.rm').forEach(b=>b.addEventListener('click', ()=>{ cart.splice(Number(b.dataset.i),1); renderCart(); renderCartBadge(); }));
+  }
+  document.getElementById('openCart').addEventListener('click', ()=>{ renderCart(); openSheet('cart'); });
+
+  document.getElementById('sendOrderBtn').addEventListener('click', function(){
+    if(!cart.length){ toast('O carrinho está vazio'); return; }
+    const name = document.getElementById('custName').value.trim();
+    const contact = document.getElementById('custContact').value.trim();
+    if(!name || !contact){ toast('Preenche o nome e o contacto'); return; }
+    const lines = cart.map(l=>`• ${l.name} (${l.color}, ${l.size}) x${l.qty} — ${kz(l.unitPrice*l.qty)}${l.isDeposit?' [sinal de reserva]':''}${l.status==='espera'?' [tempo de espera]':''}`).join('\n');
+    const msg = `Olá! Sou ${name} (${contact}).\nQuero fazer este pedido na Lumexa:\n${lines}\n\nTotal: ${kz(cartTotal())}`;
+    const num = (state.store.whatsapp||'').replace(/\D/g,'');
+    const url = 'https://wa.me/' + (num||'') + '?text=' + encodeURIComponent(msg);
+    // abrir já, de forma síncrona com o clique, para o telemóvel não bloquear a abertura
+    window.open(url, '_blank');
+    const order = {name, contact, lines: cart, total: cartTotal(), createdAt: Date.now()};
+    if(dbApi){ dbApi.collection('orders').add(order).catch(function(){ /* WhatsApp já foi enviado à mesma */ }); }
+    cart = []; renderCartBadge(); renderCart(); closeSheet('cart');
+    toast('WhatsApp aberto — confirma o envio lá dentro');
+  });
+
+  // ---------- ADMIN ----------
+  document.getElementById('openAdmin').addEventListener('click', ()=>{ renderAdmin(); openSheet('admin'); });
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+    ['produtos','def','pedidos'].forEach(k=>document.getElementById('tab-'+k).style.display = k===t.dataset.tab?'block':'none');
+    if(t.dataset.tab==='pedidos') renderOrdersTab();
+  }));
+
+  function renderAdmin(){
+    document.getElementById('tab-produtos').innerHTML = state.products.map((p,i)=>`
+      <div class="admin-product" data-i="${i}">
+        <div class="photo-row">
+          <div class="photo-preview" id="preview-${i}">${p.image?`<img src="${p.image}" alt="">`:esc(p.emoji||'🛍️')}</div>
+          <div style="flex:1">
+            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Foto do produto</label>
+            <input type="file" accept="image/*" data-photo="${i}">
+            ${p.image?`<button class="del-link" data-clearphoto="${i}" style="margin-top:4px">Remover foto</button>`:''}
+          </div>
+        </div>
+        <div class="field"><label>Nome</label><input data-f="name" value="${esc(p.name)}"></div>
+        <div class="row2">
+          <div class="field"><label>Categoria</label>
+            <select data-f="category"><option value="roupa" ${p.category==='roupa'?'selected':''}>Roupa</option><option value="acessorios" ${p.category==='acessorios'?'selected':''}>Acessórios</option></select></div>
+          <div class="field"><label>Preço (Kz)</label><input type="number" data-f="price" value="${p.price}"></div>
+        </div>
+        <div class="field"><label>Cores (separadas por vírgula)</label><input data-f="colors" value="${esc(p.colors.join(', '))}"></div>
+        <div class="field"><label>Tamanhos (separados por vírgula)</label><input data-f="sizes" value="${esc(p.sizes.join(', '))}"></div>
+        <div class="row2">
+          <div class="field"><label>Estado</label>
+            <select data-f="status">
+              <option value="disponivel" ${p.status==='disponivel'?'selected':''}>Disponível</option>
+              <option value="espera" ${p.status==='espera'?'selected':''}>Tempo de espera</option>
+              <option value="a_chegar" ${p.status==='a_chegar'?'selected':''}>A chegar (reserva)</option>
+              <option value="indisponivel" ${p.status==='indisponivel'?'selected':''}>Indisponível</option>
+            </select></div>
+          <div class="field"><label>Sinal sugerido (Kz)</label><input type="number" data-f="deposit" value="${p.deposit||0}"></div>
+        </div>
+        <div class="field"><label>Prazo / previsão de chegada</label><input data-f="eta" value="${esc(p.eta||'')}"></div>
+        <button class="del-link" data-del="${i}">Remover produto</button>
+      </div>`).join('') + '<button class="ghost-btn" id="addProdBtn">+ Adicionar produto</button>';
+
+    document.querySelectorAll('[data-photo]').forEach(inp=>inp.addEventListener('change', function(){
+      const i = Number(inp.dataset.photo), file = inp.files && inp.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev){
+        const img = new Image();
+        img.onload = function(){
+          const maxW = 480, scale = Math.min(1, maxW/img.width);
+          const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+          const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          state.products[i].image = cv.toDataURL('image/jpeg',0.75);
+          renderAdmin();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }));
+    document.querySelectorAll('[data-clearphoto]').forEach(b=>b.addEventListener('click', ()=>{
+      delete state.products[Number(b.dataset.clearphoto)].image; renderAdmin();
+    }));
+    document.querySelectorAll('#tab-produtos .admin-product').forEach(card=>{
+      card.querySelectorAll('[data-f]').forEach(inp=>inp.addEventListener('change', ()=>{
+        const i = Number(card.dataset.i), f = inp.dataset.f, p = state.products[i];
+        if(f==='colors'||f==='sizes') p[f] = inp.value.split(',').map(s=>s.trim()).filter(Boolean);
+        else if(f==='price'||f==='deposit') p[f] = Number(inp.value)||0;
+        else p[f] = inp.value;
+      }));
+    });
+    document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+      state.products.splice(Number(b.dataset.del),1); renderAdmin();
+    }));
+    document.getElementById('addProdBtn').addEventListener('click', ()=>{
+      state.products.push({id:'p'+Date.now(), name:'Novo produto', category:'roupa', emoji:'🛍️', price:0, colors:['Preto'], sizes:['Único'], status:'disponivel', eta:'', deposit:0});
+      renderAdmin();
+    });
+
+    document.getElementById('tab-def').innerHTML = `
+      <div class="field"><label>Nome da loja</label><input id="defName" value="${esc(state.store.name)}"></div>
+      <div class="field"><label>Frase curta</label><input id="defTag" value="${esc(state.store.tagline)}"></div>
+      <div class="field"><label>Número de WhatsApp (com código do país, só números)</label><input id="defWa" value="${esc(state.store.whatsapp)}" placeholder="244923456789"></div>
+      <div class="note-box">Os pedidos chegam a este número via WhatsApp já preenchidos. Sem este número, o botão de encomenda não sabe para onde enviar.</div>`;
+    ['defName','defTag','defWa'].forEach(id=>document.getElementById(id).addEventListener('change', e=>{
+      if(id==='defName') state.store.name = e.target.value;
+      if(id==='defTag') state.store.tagline = e.target.value;
+      if(id==='defWa') state.store.whatsapp = e.target.value;
+    }));
+  }
+
+  async function renderOrdersTab(){
+    const el = document.getElementById('tab-pedidos');
+    el.innerHTML = '<div class="empty">A carregar pedidos guardados…</div>';
+    if(!dbApi){ el.innerHTML = '<div class="note-box">O registo interno de pedidos não está disponível nesta vista. O WhatsApp continua a ser o canal garantido — todos os pedidos chegam sempre por lá.</div>'; return; }
+    try{
+      const snap = await dbApi.collection('orders').orderBy('createdAt','desc').limit(30).get();
+      const rows = snap.docs || snap || [];
+      if(!rows.length){ el.innerHTML = '<div class="empty">Ainda sem pedidos guardados aqui. Verifica também o WhatsApp.</div>'; return; }
+      el.innerHTML = rows.map(d=>{
+        const o = d.data ? d.data() : d;
+        const lines = (o.lines||[]).map(l=>`${esc(l.name)} (${esc(l.color)}, ${esc(l.size)}) x${l.qty}`).join('<br>');
+        return `<div class="admin-product"><b>${esc(o.name)}</b> · ${esc(o.contact)}<div class="meta" style="margin-top:6px">${lines}</div><div style="margin-top:6px;font-weight:600">${kz(o.total)}</div></div>`;
+      }).join('');
+    }catch(e){
+      el.innerHTML = '<div class="note-box">Não foi possível carregar o registo interno agora. O WhatsApp continua a funcionar normalmente para todos os pedidos.</div>';
+    }
+  }
+
+  document.getElementById('publishBtn').addEventListener('click', async ()=>{
+    document.getElementById('state-data').textContent = JSON.stringify(state);
+    ['prod','cart','admin'].forEach(closeSheet);
+    if(window.claude){
+      try{
+        const artifactApi = await window.claude.use('artifact');
+        if(artifactApi){
+          const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+          const res = await artifactApi.publish(html);
+          if(res){ toast('Alterações publicadas para todos'); return; }
+        }
+      }catch(e){}
+    }
+    toast('Não foi possível publicar — só o dono da loja pode guardar alterações');
+  });
+
+  // ---------- INIT ----------
+  async function init(){
+    renderHeader(); renderGrid(); renderCartBadge();
+    if(window.claude){
+      try{
+        const user = await window.claude.use('user');
+        canEdit = !!(user && user.canEdit && user.canEdit());
+        if(canEdit) document.getElementById('openAdmin').classList.add('show');
+      }catch(e){}
+      try{ dbApi = await window.claude.use('db'); }catch(e){ dbApi = null; }
+    }
+  }
+  init();
+})();
+</script>
+
+
+</body></html>
